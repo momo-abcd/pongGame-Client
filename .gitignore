@@ -1,0 +1,7 @@
+bin/
+exampleBin/
+libraries/
+a.txt
+exampleCompile.sh
+exampleRun.sh
+Test.java
