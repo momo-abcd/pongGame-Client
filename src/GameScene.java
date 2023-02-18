@@ -7,6 +7,11 @@ import javafx.scene.input.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.*;
+import javafx.scene.paint.*;
+ import javafx.scene.canvas.*;
+ import javafx.scene.shape.ArcType;
+ import javafx.scene.text.Font;
+
 
 public class GameScene extends Scene {
     //Scene 기본 설정 값 
@@ -31,19 +36,24 @@ public class GameScene extends Scene {
     BooleanProperty upPressed = new SimpleBooleanProperty();
     BooleanProperty downPressed = new SimpleBooleanProperty();
 
+    // graphics 로 전환 변수들
+     final Canvas canvas = new Canvas(Width,Height);
+     GraphicsContext gc = canvas.getGraphicsContext2D();
 
 
     // GameScene 초기화
     public GameScene(){
         super(group, Width, Height, Color.BLACK);
 
-        ball = new Ball(Width/2, Height/2);
-        userPaddle = new Paddle(0, Height/2-50, Color.WHITE);
-        pcPaddle = new Paddle(Width-25,Height/2-50, Color.RED);
-        Centerline line = new Centerline();
+        ball = new Ball();
+        userPaddle = new Paddle(0, Height/2-50);
+        pcPaddle = new Paddle(Width-Paddle.Width,Height/2-50);
+        // Centerline line = new Centerline();
         score = new ScoreBoard();
+        gc.setFont(new Font(40));
 
-        group.getChildren().addAll(userPaddle, pcPaddle, ball, line,score);
+        // group.getChildren().addAll(userPaddle, pcPaddle, ball, line,score);
+        group.getChildren().add(canvas);
         installEvent();
         animationTimer = timer();
         animationTimer.start();
@@ -99,6 +109,12 @@ public class GameScene extends Scene {
                             event.consume();
                         }
                         break;
+                    case Q:
+                        animationTimer.stop();
+                        break;
+                    case R:
+                        animationTimer.start();
+                        break;
                 }
             }
         };
@@ -109,7 +125,7 @@ public class GameScene extends Scene {
 
     // 그리기 함수 (에니메이션 쓰레드에서 주기마다 호출)
     private void gameLogic() {
-        ball.update();
+        // ball.update();
         if(wPressed.get()){
             userPaddle.update(-speed);
         }
@@ -124,9 +140,24 @@ public class GameScene extends Scene {
         }
 
         // 패들과 볼 충돌시 방향 전환
-        if(userPaddle.detectBallCollision(ball) || pcPaddle.detectBallCollision(ball)) {
-            ball.reverseX();
-            // ball.reverseY();
+        if(userPaddle.detectBallCollision(ball)){
+            double collidPoint = (ball.getY() - (userPaddle.getY() + Paddle.Height/2));
+            collidPoint = collidPoint / (Paddle.Height/2);
+
+            double angleRad = (Math.PI/4) * collidPoint;
+            // ball.reverseX();
+            double direction = ball.getX() + ball.getRadius() < Width/2 ? 1 : -1;
+            ball.setXVelocity(angleRad, direction);
+            ball.setYVelocity(angleRad, direction);
+        }
+        if(pcPaddle.detectBallCollision(ball)){
+            double collidPoint = (ball.getY() - (pcPaddle.getY() + Paddle.Height/2));
+            collidPoint = collidPoint / (Paddle.Height/2);
+
+            double angleRad = (Math.PI/4) * collidPoint;
+            double direction = ball.getX() + ball.getRadius() < Width/2 ? 1 : -1;
+            ball.setXVelocity(angleRad, direction);
+            ball.setYVelocity(angleRad, direction);
         }
 
         // 볼이 나갔을 경우 점수 처리
@@ -135,12 +166,41 @@ public class GameScene extends Scene {
             if(score.addP1Score()){
             }
         }
-        if((int)ball.getX() == (int)Width+1){
-            System.out.println((int)ball.getX());
+        if((int)ball.getX()+ball.getRadius() >= (int)Width+1){
             ball.resetBall();
             if(score.addP2Score()) {
             }
         }
+        // scoreBoard.update();
+        ball.update();
+        draw();
+    }
+    void draw() {
+        this.gc.clearRect(0,0, Width,Height);
+
+        // draw userPaddle
+        this.gc.setFill(Color.WHITE);
+        this.gc.fillRect(0,userPaddle.getY(), Paddle.Width,Paddle.Height);
+
+        // draw pcPaddle
+        this.gc.setFill(Color.RED);
+        this.gc.fillRect(pcPaddle.getX(),pcPaddle.getY(), Paddle.Width,Paddle.Height);
+
+        // draw ball
+        gc.setFill(Color.BLUE);
+        // gc.fillArc(ball.getX()+ball.getRadius(), ball.getY()-ball.getRadius(),Ball.Width, Ball.Height,(double)0,(double)360,ArcType.OPEN);;
+        // gc.fillOval(ball.getX(), ball.getY(),Ball.Width, Ball.Height);
+        gc.fillRoundRect(ball.getX(), ball.getY(),Ball.Width, Ball.Height,Ball.Width,Ball.Height);
+
+        gc.setFill(Color.WHITE);
+        gc.fillText(score.getP1Score(),Width/2-50,50);
+        gc.fillText(score.getP2Score(),Width/2+50,50);
+
+        gc.setStroke(Color.WHITE);
+        gc.setLineWidth(2);
+        gc.setLineDashes(20);
+        // gc.setLineDashOffset(5);
+        gc.strokeLine(Width/2,0,Width/2+10,Height);
     }
 
 

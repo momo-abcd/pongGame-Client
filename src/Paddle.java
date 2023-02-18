@@ -1,24 +1,23 @@
 package src;
 
 import javafx.scene.*;
-import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 
-public class Paddle extends Rectangle {
+public class Paddle {
     // 패들 기본 설정 변수 선언
-    private static final double Width = 25;
-    private static final double Height = 100;
+     final static double Width = 25;
+     final static double Height = 100;
     // private static final Color COLOR = Color.WHITE;
 
     // 이동 관련 변수 선언
     private double y;
+    private double x;
     private double yVelocity = 0;
 
     // Paddle 클래스 초기화 생성자
-    public Paddle(double initX, double initY, Color color) {
-        super(initX,initY,Width,Height);
+    public Paddle(double initX, double initY) {
         y = initY;
-        this.setFill(color);
+        x = initX;
     }
 
     // y변위 설정 메서드
@@ -45,32 +44,30 @@ public class Paddle extends Rectangle {
     }
 
     public boolean detectBallCollision(Ball ball) {
-        double ballX = ball.getX();
-        double ballY = ball.getY();
         double radius = ball.getRadius();
-        double x = this.getX();
-        double y = this.getY();
-        // 왼쪽 패들일 경우
-        if(x < 1){
-            if(x + Width >= ballX-radius){
-                if(y <= ballY-radius && y+Height >= ballY+radius) {
-                    return true;
-                }
-            }
-        }
-        // 오른쪽 패들일 경우
-        else {
-            if(x <= ballX+radius)
-                if(y <= ballY-radius && y+Height >= ballY+radius) {
-                    return true;
-                }
-        }
-        return false;
+            
+        double top = y;
+        double bottom = y + Height;
+        double left = x;
+        double right = x + Width; 
+
+        double bTop = ball.getY() - radius;
+        double bBottom = ball.getY() + radius;
+        double bLeft = ball.getX() - radius+15;
+        double bRight = ball.getX() + radius+15;
+        return left < bRight && top < bBottom && right > bLeft
+            && bottom > bTop;
     }
 
     public void update(double v) {
         setYDirection(v);
         move();
-        this.setY(y);
     }
+    public double getX() {
+        return x;
+    }
+    public double getY() {
+        return y;
+    }
+
 }

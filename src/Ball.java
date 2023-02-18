@@ -1,22 +1,25 @@
 package src;
-import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
 import java.util.Random;
-class Ball extends Circle {
+class Ball {
     // 볼의 성질에 대한 변수 선언
-    private static double radius = 15;
+    // private static double radius = 30;
     private static double ballSpeed = 3;
 
+     static double Width = 30;
+     static double Height = 30;
+     private double radius = Width/2;
 
-    private double x = GameScene.Width/2;
-    private double y = GameScene.Height/2;
 
-    private double yVelocity = ballSpeed;
-    private double xVelocity = ballSpeed;
-    public Ball(double initX, double initY) {
-        super(initX,initY,radius);
-        this.setFill(Color.BLUE);
+    private double x;
+    private double y;
+
+    private double yVelocity;
+    private double xVelocity;
+    public Ball() {
         resetBall();
+        yVelocity = ballSpeed;
+        xVelocity = ballSpeed;
     }
 
     private void move() {
@@ -28,8 +31,6 @@ class Ball extends Circle {
         // setYDirection();
         // setXDirection();
         move();
-        setCenterX(x);
-        setCenterY(y);
     }
     // private void setYDirection(double yDirection){
     //     yVelocity *= yDirection;
@@ -50,9 +51,9 @@ class Ball extends Circle {
     }
     private void detectWallCollision() {
         // x - radius 한 값이 <= 0 --> setYDirection(-1);
-        if(y - radius <= 0 )
+        if(y <= 0 )
             reverseY();
-        if(y + radius >= GameScene.Height)
+        if(y + Height >= GameScene.Height)
             reverseY();
         // if(x-radius <= 0)
         //     reverseX();
@@ -69,5 +70,19 @@ class Ball extends Circle {
     public double getY() {
         return this.y;
     }
-
+    public double getRadius() {
+        return radius;
+    }
+    public double getXDirection() {
+        return xVelocity;
+    }
+    public double getYDirection() {
+        return xVelocity;
+    }
+    public void setXVelocity(double angleRad, double direction) {
+        xVelocity = direction * ballSpeed * Math.cos(angleRad);
+    }
+    public void setYVelocity(double angleRad, double direction) {
+        yVelocity = ballSpeed * Math.sin(angleRad);
+    }
 }
