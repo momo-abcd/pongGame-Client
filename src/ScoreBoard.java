@@ -1,14 +1,11 @@
 package src;
-import javafx.scene.layout.*;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.layout.*;
-import javafx.geometry.*;
+
 class ScoreBoard {
     static int fontSize = 40;
     private int p1Score = 0;
     private int p2Score = 0;
+
+    // constructor
     public ScoreBoard(){
     }
 

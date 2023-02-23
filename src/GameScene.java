@@ -1,8 +1,4 @@
 package src;
-import javafx.application.Platform;
-// import javafx.application.Application;
-import javafx.geometry.Pos;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.scene.*;
 import javafx.scene.paint.Color;
@@ -11,13 +7,9 @@ import javafx.scene.input.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.*;
-import javafx.scene.paint.*;
 import javafx.scene.canvas.*;
 import javafx.scene.text.Font;
-import javafx.scene.shape.*;
 import javafx.scene.control.Label;
-import javafx.scene.text.Font;
-
 
 public class GameScene extends Scene {
     //Scene 기본 설정 값 
@@ -185,12 +177,12 @@ public class GameScene extends Scene {
         ball.update();
         draw();
     }
-    private void endGame(String str) {
+    private void endGame(String whoWin) {
         animationTimer.stop();
         animationTimer = null;
 
-        Label label = new Label(str);
-        Label label2 = new Label("Press Enter to restart game");
+        Label label = new Label(whoWin);
+        Label label2 = new Label("Press Enter to restart the game");
         label.setFont(new Font(70));
         label.setTextFill(Color.GREEN);
         label.setLayoutX(Width/2 - 140);
@@ -224,7 +216,14 @@ public class GameScene extends Scene {
         });
     }
     void draw() {
+        // clear previous drawing
         this.gc.clearRect(0,0, Width,Height);
+
+        // draw center line
+        gc.setStroke(line.getColor());
+        gc.setLineWidth(2);
+        gc.setLineDashes(20);
+        gc.strokeLine(Width/2,0,Width/2+10,Height);
 
         // draw userPaddle
         this.gc.setFill(Color.WHITE);
@@ -236,22 +235,14 @@ public class GameScene extends Scene {
 
         // draw ball
         gc.setFill(ball.getColor());
-        // gc.fillArc(ball.getX()+ball.getRadius(), ball.getY()-ball.getRadius(),Ball.Width, Ball.Height,(double)0,(double)360,ArcType.OPEN);;
-        // gc.fillOval(ball.getX(), ball.getY(),Ball.Width, Ball.Height);
         gc.fillRoundRect(ball.getX(), ball.getY(),Ball.Width, Ball.Height,Ball.Width,Ball.Height);
-        // gc.fillArc(ball.getX(), ball.getY(), Ball.Width,Ball.Height,0,180, ArcType.ROUND);
 
+        // draw scroe
         gc.setFill(Color.WHITE);
         gc.fillText(score.getP1Score(),Width/2-50,50);
         gc.fillText(score.getP2Score(),Width/2+25,50);
 
-        gc.setStroke(line.getColor());
-        gc.setLineWidth(2);
-        gc.setLineDashes(20);
-        // gc.setLineDashOffset(5);
-        gc.strokeLine(Width/2,0,Width/2+10,Height);
     }
-
 
     // 에니메이션 쓰레드 생성함수
     private AnimationTimer timer() {
