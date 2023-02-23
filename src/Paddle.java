@@ -1,5 +1,4 @@
 package src;
-
 import javafx.scene.*;
 import javafx.scene.paint.Color;
 
@@ -29,7 +28,6 @@ public class Paddle {
     private void move() {
         if(detectWallCollision()) return;
         else y += yVelocity;
-
     }
 
     // Paddle, 벽 충돌 감지 메소드
@@ -42,7 +40,8 @@ public class Paddle {
             return false;
         }else return false;
     }
-
+    
+    // 볼이랑 부딪히는지 확인하는 메서드
     public boolean detectBallCollision(Ball ball) {
         double radius = ball.getRadius();
             

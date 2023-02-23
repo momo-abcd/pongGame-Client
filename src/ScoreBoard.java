@@ -14,12 +14,12 @@ class ScoreBoard {
 
     public boolean addP1Score() {
         p1Score++;
-        if(p1Score > 3) return true;
+        if(p1Score > 1) return true;
         return false;
     } 
     public boolean addP2Score() {
         p2Score++;
-        if(p2Score > 3) return true;
+        if(p2Score > 1) return true;
         return false;
     }
     public String getP1Score(){

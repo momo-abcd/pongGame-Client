@@ -1,5 +1,9 @@
 package src;
 import javafx.application.Platform;
+// import javafx.application.Application;
+import javafx.geometry.Pos;
+import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 import javafx.scene.*;
 import javafx.scene.paint.Color;
 import javafx.event.*;
@@ -8,19 +12,21 @@ import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.*;
 import javafx.scene.paint.*;
- import javafx.scene.canvas.*;
- import javafx.scene.shape.ArcType;
- import javafx.scene.text.Font;
+import javafx.scene.canvas.*;
+import javafx.scene.text.Font;
+import javafx.scene.shape.*;
+import javafx.scene.control.Label;
+import javafx.scene.text.Font;
 
 
 public class GameScene extends Scene {
     //Scene 기본 설정 값 
     final static double Width = 640;
     final static double Height = 540;
-    private final static Group group = new Group();
+    // private static final Group group = new Group();
 
     // timer 변수
-    final AnimationTimer animationTimer;
+     AnimationTimer animationTimer;
 
     // Paddle 변수 선언
     Paddle userPaddle;
@@ -40,19 +46,25 @@ public class GameScene extends Scene {
      final Canvas canvas = new Canvas(Width,Height);
      GraphicsContext gc = canvas.getGraphicsContext2D();
 
+    Group group;
+
+    final Stage stage;
+    CenterLine line;
 
     // GameScene 초기화
-    public GameScene(){
-        super(group, Width, Height, Color.BLACK);
+    public GameScene(Stage primaryStage){
+        super(new Group(), Width, Height, Color.BLACK);
+        stage = primaryStage;
 
         ball = new Ball();
         userPaddle = new Paddle(0, Height/2-50);
         pcPaddle = new Paddle(Width-Paddle.Width,Height/2-50);
-        // Centerline line = new Centerline();
+        line = new CenterLine();
         score = new ScoreBoard();
         gc.setFont(new Font(40));
 
         // group.getChildren().addAll(userPaddle, pcPaddle, ball, line,score);
+        group = (Group) getRoot();
         group.getChildren().add(canvas);
         installEvent();
         animationTimer = timer();
@@ -75,7 +87,7 @@ public class GameScene extends Scene {
                             wPressed.set(false);
                             event.consume();
                         }
-                        break;
+                      break;
                     case S:
                         if(event.getEventType() == KeyEvent.KEY_PRESSED){
                             // userPaddle.update(speed);
@@ -108,12 +120,6 @@ public class GameScene extends Scene {
                             downPressed.set(false);
                             event.consume();
                         }
-                        break;
-                    case Q:
-                        animationTimer.stop();
-                        break;
-                    case R:
-                        animationTimer.start();
                         break;
                 }
             }
@@ -161,19 +167,61 @@ public class GameScene extends Scene {
         }
 
         // 볼이 나갔을 경우 점수 처리
-        if((int)ball.getX() == -1){
+        if((int)ball.getX() <= -1){
             ball.resetBall();
             if(score.addP1Score()){
+                // 게임 끝내기
+                endGame("You Win!");
             }
         }
         if((int)ball.getX()+ball.getRadius() >= (int)Width+1){
             ball.resetBall();
             if(score.addP2Score()) {
+                // 게임 끝내기
+                endGame("You Lose!");
             }
         }
         // scoreBoard.update();
         ball.update();
         draw();
+    }
+    private void endGame(String str) {
+        animationTimer.stop();
+        animationTimer = null;
+
+        Label label = new Label(str);
+        Label label2 = new Label("Press Enter to restart game");
+        label.setFont(new Font(70));
+        label.setTextFill(Color.GREEN);
+        label.setLayoutX(Width/2 - 140);
+        label.setLayoutY(Height/2- 70);
+        label2.setFont(new Font(20));
+        label2.setTextFill(Color.GREEN);
+        label2.setLayoutX(Width/2 - 130);
+        label2.setLayoutY(Height/2+ 30);
+        
+        // group.getChildren().remove(ball);
+        // group.getChildren().remove(score);
+        ball.setColor(Color.BLACK);
+        line.setColor(Color.BLACK);
+        group.getChildren().addAll(label, label2);
+        // stage.setScene(new GameScene(stage));
+
+
+        // final EventHandler<KeyEvent> handler = new EventHandler<KeyEvent>(){
+
+        this.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if(event.getCode().toString().equals("ENTER")){
+                    // 엔터 누르면 게임 다시 시작
+                    stage.setScene(new GameScene(stage));
+                }
+                if(event.getCode().toString().equals("Q")){
+                    stage.close();
+                }
+            }
+        });
     }
     void draw() {
         this.gc.clearRect(0,0, Width,Height);
@@ -187,16 +235,17 @@ public class GameScene extends Scene {
         this.gc.fillRect(pcPaddle.getX(),pcPaddle.getY(), Paddle.Width,Paddle.Height);
 
         // draw ball
-        gc.setFill(Color.BLUE);
+        gc.setFill(ball.getColor());
         // gc.fillArc(ball.getX()+ball.getRadius(), ball.getY()-ball.getRadius(),Ball.Width, Ball.Height,(double)0,(double)360,ArcType.OPEN);;
         // gc.fillOval(ball.getX(), ball.getY(),Ball.Width, Ball.Height);
         gc.fillRoundRect(ball.getX(), ball.getY(),Ball.Width, Ball.Height,Ball.Width,Ball.Height);
+        // gc.fillArc(ball.getX(), ball.getY(), Ball.Width,Ball.Height,0,180, ArcType.ROUND);
 
         gc.setFill(Color.WHITE);
         gc.fillText(score.getP1Score(),Width/2-50,50);
-        gc.fillText(score.getP2Score(),Width/2+50,50);
+        gc.fillText(score.getP2Score(),Width/2+25,50);
 
-        gc.setStroke(Color.WHITE);
+        gc.setStroke(line.getColor());
         gc.setLineWidth(2);
         gc.setLineDashes(20);
         // gc.setLineDashOffset(5);

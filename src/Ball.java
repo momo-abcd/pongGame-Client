@@ -5,6 +5,7 @@ class Ball {
     // 볼의 성질에 대한 변수 선언
     // private static double radius = 30;
     private static double ballSpeed = 3;
+    private Color color;
 
      static double Width = 30;
      static double Height = 30;
@@ -20,6 +21,7 @@ class Ball {
         resetBall();
         yVelocity = ballSpeed;
         xVelocity = ballSpeed;
+        color = Color.BLUE;
     }
 
     private void move() {
@@ -80,9 +82,17 @@ class Ball {
         return xVelocity;
     }
     public void setXVelocity(double angleRad, double direction) {
-        xVelocity = direction * ballSpeed * Math.cos(angleRad);
+        // xVelocity = direction * ballSpeed * Math.cos(angleRad);
+        xVelocity = direction * ballSpeed;
     }
     public void setYVelocity(double angleRad, double direction) {
+        // yVelocity = ballSpeed * Math.sin(angleRad);
         yVelocity = ballSpeed * Math.sin(angleRad);
+    }
+    public Color getColor(){
+        return this.color;
+    }
+    public void setColor(Color change){
+        this.color=change;
     }
 }
