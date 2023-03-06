@@ -11,7 +11,7 @@ import javafx.scene.canvas.*;
 import javafx.scene.text.Font;
 import javafx.scene.control.Label;
 
-public class GameScene extends Scene {
+public class MultiGameScene extends Scene {
     //Scene 기본 설정 값 
     final static double Width = 640;
     final static double Height = 540;
@@ -44,7 +44,7 @@ public class GameScene extends Scene {
     CenterLine line;
 
     // constructor
-    public GameScene(Stage primaryStage){
+    public MultiGameScene(Stage primaryStage){
         super(new Group(), Width, Height, Color.BLACK);
         stage = primaryStage;
 
@@ -88,28 +88,6 @@ public class GameScene extends Scene {
                         }else {
                             // userPaddle.update(0);
                             sPressed.set(false);
-                            event.consume();
-                        }
-                        break;
-                    case UP:
-                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            // pcPaddle.update(-speed);
-                            upPressed.set(true);
-                            event.consume();
-                        }else {
-                            // pcPaddle.update(0);
-                            upPressed.set(false);
-                            event.consume();
-                        }
-                        break;
-                    case DOWN:
-                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            // pcPaddle.update(speed);
-                            downPressed.set(true);
-                            event.consume();
-                        }else {
-                            // pcPaddle.update(0);
-                            downPressed.set(false);
                             event.consume();
                         }
                         break;
