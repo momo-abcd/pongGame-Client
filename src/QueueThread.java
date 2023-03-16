@@ -44,10 +44,17 @@ public class QueueThread extends Thread {
         String data ="";
         try {
             while((data = br.readLine()) != null){
-                if(data.equals("gameStart")){
+                System.out.println(data);
+                // System.out.println(data.substring(0,8));
+                if(data.equals("ready?")){
+                    pw.println("ready");
+                    pw.flush();
+                }
+                if(data.split(":")[0].equals("gameStart")){
+                    String playerCode =  data.split(":")[1];
                     Platform.runLater(()->{
                     primaryStage.setTitle("온라인 게임신");
-                    primaryStage.setScene(new MultiGameScene(primaryStage));
+                    primaryStage.setScene(new MultiGameScene(primaryStage, socket, playerCode));
                     }); 
                     break;
                 }

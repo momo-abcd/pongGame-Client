@@ -43,9 +43,8 @@ public class StandByScene extends Scene {
             @Override
             public void handle(MouseEvent e) {
                 Rectangle rectangle = new Rectangle(100, 100, Color.BLUE);
-                Label text = new Label("큐 잡는중...");
                 Button cancleBtn = new Button("큐 잡기 취소");
-                group.getChildren().addAll(rectangle, cancleBtn, text);
+                group.getChildren().addAll(rectangle, cancleBtn);
                 QueueThread tt = new QueueThread(stage);
                 tt.setDaemon(true);
                 tt.start();
@@ -53,7 +52,7 @@ public class StandByScene extends Scene {
                     @Override
                     public void handle(MouseEvent e) {
                         System.out.println("큐 찾기 종료");
-                        group.getChildren().removeAll(cancleBtn, rectangle, text);
+                        group.getChildren().removeAll(cancleBtn, rectangle);
                         tt.cancle();
                     }
                 });

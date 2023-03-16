@@ -4,6 +4,13 @@ import javafx.scene.*;
 import javafx.scene.paint.Color;
 import javafx.event.*;
 import javafx.scene.input.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.*;
@@ -43,10 +50,24 @@ public class MultiGameScene extends Scene {
     final Stage stage;
     CenterLine line;
 
+    // network 관련
+    final Socket socket;
+    BufferedReader br;
+    PrintWriter pw;
+    String playerCode;
+
     // constructor
-    public MultiGameScene(Stage primaryStage){
+    public MultiGameScene(Stage primaryStage, Socket server, String playerCode){
         super(new Group(), Width, Height, Color.BLACK);
         stage = primaryStage;
+        this.socket = server;
+        this.playerCode = playerCode;
+        try {
+            br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            pw = new PrintWriter(socket.getOutputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         ball = new Ball();
         userPaddle = new Paddle(0, Height/2-50);
@@ -61,8 +82,13 @@ public class MultiGameScene extends Scene {
         installEvent();
         animationTimer = timer();
         animationTimer.start();
-    }
 
+
+    }
+    private String makeKeyDataToSend(String playerCode, String keyCode, String instruction) {
+        String data = playerCode + ":"+keyCode.toLowerCase()+":"+instruction;
+        return data;
+    }
     // 이벤트 핸들러 등록 함수
     private void installEvent() {
         final EventHandler<KeyEvent> handler = new EventHandler<KeyEvent>(){
@@ -71,23 +97,46 @@ public class MultiGameScene extends Scene {
                 switch(event.getCode()){
                     case W:
                         if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            // userPaddle.update(-speed);
-                            wPressed.set(true);
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
                             event.consume();
                         }else {
                             // userPaddle.update(0);
-                            wPressed.set(false);
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
                             event.consume();
                         }
                       break;
                     case S:
                         if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            // userPaddle.update(speed);
-                            sPressed.set(true);
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
                             event.consume();
                         }else {
-                            // userPaddle.update(0);
-                            sPressed.set(false);
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
+                            event.consume();
+                        }
+                        break;
+                    case UP:
+                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
+                            event.consume();
+                        }else {
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
+                            event.consume();
+                        }
+                        break;
+                    case DOWN:
+                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
+                            event.consume();
+                        }else {
+                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                            pw.flush();
                             event.consume();
                         }
                         break;
@@ -102,6 +151,7 @@ public class MultiGameScene extends Scene {
     // 그리기 함수 (에니메이션 쓰레드에서 주기마다 호출)
     private void gameLogic() {
         // ball.update();
+        
         if(wPressed.get()){
             userPaddle.update(-speed);
         }
@@ -151,8 +201,7 @@ public class MultiGameScene extends Scene {
                 endGame("You Lose!");
             }
         }
-        // scoreBoard.update();
-        ball.update();
+        // ball.update();
         draw();
     }
     private void endGame(String whoWin) {
