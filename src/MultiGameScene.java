@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
@@ -56,6 +58,14 @@ public class MultiGameScene extends Scene {
     PrintWriter pw;
     String playerCode;
 
+
+    // 멀티게임을 위한 객체 변수들
+    double MballX;
+    double MballY;
+    double player1Y;
+    double player2Y;
+
+
     // constructor
     public MultiGameScene(Stage primaryStage, Socket server, String playerCode){
         super(new Group(), Width, Height, Color.BLACK);
@@ -82,6 +92,25 @@ public class MultiGameScene extends Scene {
         installEvent();
         animationTimer = timer();
         animationTimer.start();
+
+        Timer timer2 = new Timer(true);
+        timer2.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                String a = "";
+                try {
+                    while((a = br.readLine()) != null){
+                        System.out.println(a);
+                        MballX = Double.parseDouble(a.split(":")[2]);
+                        MballY = Double.parseDouble(a.split(":")[3]);
+                        player1Y = Double.parseDouble(a.split(":")[0]);
+                        player2Y = Double.parseDouble(a.split(":")[1]);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 0);
 
 
     }
@@ -151,7 +180,7 @@ public class MultiGameScene extends Scene {
     // 그리기 함수 (에니메이션 쓰레드에서 주기마다 호출)
     private void gameLogic() {
         // ball.update();
-        
+
         if(wPressed.get()){
             userPaddle.update(-speed);
         }
@@ -255,15 +284,18 @@ public class MultiGameScene extends Scene {
 
         // draw userPaddle
         this.gc.setFill(Color.WHITE);
-        this.gc.fillRect(0,userPaddle.getY(), Paddle.Width,Paddle.Height);
+        // this.gc.fillRect(0,userPaddle.getY(), Paddle.Width,Paddle.Height);
+        this.gc.fillRect(0,player1Y, Paddle.Width,Paddle.Height);
 
         // draw pcPaddle
         this.gc.setFill(Color.RED);
-        this.gc.fillRect(pcPaddle.getX(),pcPaddle.getY(), Paddle.Width,Paddle.Height);
+        // this.gc.fillRect(pcPaddle.getX(),pcPaddle.getY(), Paddle.Width,Paddle.Height);
+        this.gc.fillRect(pcPaddle.getX(),player2Y, Paddle.Width,Paddle.Height);
 
         // draw ball
         gc.setFill(ball.getColor());
-        gc.fillRoundRect(ball.getX(), ball.getY(),Ball.Width, Ball.Height,Ball.Width,Ball.Height);
+        // gc.fillRoundRect(ball.getX(), ball.getY(),Ball.Width, Ball.Height,Ball.Width,Ball.Height);
+        gc.fillRoundRect(MballX, MballY,Ball.Width, Ball.Height,Ball.Width,Ball.Height);
 
         // draw scroe
         gc.setFill(Color.WHITE);
