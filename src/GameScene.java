@@ -218,6 +218,7 @@ public class GameScene extends Scene {
     }
     void draw() {
         // clear previous drawing
+        System.out.println(ball.getX() + " // " + ball.getY());
         this.gc.clearRect(0,0, Width,Height);
 
         // draw center line

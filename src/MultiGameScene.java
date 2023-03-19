@@ -65,6 +65,12 @@ public class MultiGameScene extends Scene {
     double player1Y;
     double player2Y;
 
+    String player1_Score;
+    String player2_Score;
+
+    Color p1Color;
+    Color p2Color;
+
 
     // constructor
     public MultiGameScene(Stage primaryStage, Socket server, String playerCode){
@@ -78,7 +84,14 @@ public class MultiGameScene extends Scene {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        System.out.println("my playerCode : " + playerCode);
+        if(playerCode.equals("p1")){
+            p1Color = Color.WHITE;
+            p2Color = Color.RED;
+        }else {
+            p2Color = Color.WHITE;
+            p1Color = Color.RED;
+        }
         ball = new Ball();
         userPaddle = new Paddle(0, Height/2-50);
         pcPaddle = new Paddle(Width-Paddle.Width,Height/2-50);
@@ -90,29 +103,108 @@ public class MultiGameScene extends Scene {
         group = (Group) getRoot();
         group.getChildren().add(canvas);
         installEvent();
-        animationTimer = timer();
-        animationTimer.start();
+        // animationTimer = timer();
+        // animationTimer.start();
 
-        Timer timer2 = new Timer(true);
-        timer2.schedule(new TimerTask() {
+        // Timer recevierThread = new Timer(true);
+        // recevierThread.schedule(new TimerTask() {
+        //     @Override
+        //     public void run() {
+        //         String a = "";
+        //         try {
+        //             while((a = br.readLine()) != null){
+        //                 // System.out.println(a);
+        //                 String dataList[] = a.split(":");
+        //                 player1Y = Double.parseDouble(dataList[0]);
+        //                 player2Y = Double.parseDouble(dataList[1]);
+        //                 MballX = Double.parseDouble(dataList[2]);
+        //                 MballY = Double.parseDouble(dataList[3]);
+        //                 player1_Score = dataList[4];
+        //                 player2_Score = dataList[5];
+        //             }
+        //         } catch (IOException e) {
+        //             e.printStackTrace();
+        //         }
+        //     }
+        // }, 0);
+        Thread recevierThread = new Thread() {
             @Override
             public void run() {
                 String a = "";
+                int number  = 0;
                 try {
                     while((a = br.readLine()) != null){
-                        System.out.println(a);
-                        MballX = Double.parseDouble(a.split(":")[2]);
-                        MballY = Double.parseDouble(a.split(":")[3]);
-                        player1Y = Double.parseDouble(a.split(":")[0]);
-                        player2Y = Double.parseDouble(a.split(":")[1]);
+                        // System.out.println("데이터(" + number++ + "): " + a);
+                        // System.out.println("--------------------");
+                        String dataList[] = a.split(":");
+                        // player1Y = Double.parseDouble(dataList[0]);
+                        // player2Y = Double.parseDouble(dataList[1]);
+                        // MballX = Double.parseDouble(dataList[2]);
+                        // MballY = Double.parseDouble(dataList[3]);
+                        // player1_Score = dataList[4];
+                        // player2_Score = dataList[5];
+
+                        setPlayer1Y(Double.parseDouble(dataList[0]));
+                        setPlayer2Y(Double.parseDouble(dataList[1]));
+                        setMballX(Double.parseDouble(dataList[2]));
+                        setMballY(Double.parseDouble(dataList[3]));
+                        setPlayer1Score(dataList[4]);
+                        setPlayer2Score(dataList[5]);
+                        draw();
+
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-        }, 0);
+        };
+        recevierThread.setDaemon(true);
+        recevierThread.start();
 
+        // Timer drawThread = new Timer(true);
+        // drawThread.schedule(new TimerTask() {
+        //     @Override
+        //     public void run() {
+        //         draw();
+        //     }
+        // }, 0, 10);
 
+    }
+    private synchronized void setPlayer1Y(double value) {
+        player1Y = value;
+    }
+    private synchronized void setPlayer2Y(double value) {
+        player2Y = value;
+    }
+    private synchronized void setMballY(double value) {
+        MballY = value;
+    }
+    private synchronized void setMballX(double value) {
+        MballX = value;
+    }
+    private synchronized void setPlayer1Score(String value) {
+        player1_Score = value;
+    }
+    private synchronized void setPlayer2Score(String value) {
+        player2_Score = value;
+    }
+    private synchronized double getPlayer1Y() {
+        return player1Y;
+    }
+    private synchronized double getPlayer2Y() {
+        return player2Y;
+    }
+    private synchronized double getMballY() {
+        return MballY;
+    }
+    private synchronized double getMballX() {
+        return MballX;
+    }
+    private synchronized String getPlayer1Score() {
+        return player1_Score;
+    }
+    private synchronized String getPlayer2Score() {
+        return player2_Score;
     }
     private String makeKeyDataToSend(String playerCode, String keyCode, String instruction) {
         String data = playerCode + ":"+keyCode.toLowerCase()+":"+instruction;
@@ -123,53 +215,59 @@ public class MultiGameScene extends Scene {
         final EventHandler<KeyEvent> handler = new EventHandler<KeyEvent>(){
             @Override
             public void handle(KeyEvent event){
-                switch(event.getCode()){
-                    case W:
-                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }else {
-                            // userPaddle.update(0);
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }
-                      break;
-                    case S:
-                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }else {
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }
+                if(playerCode.equals("p1")){
+                    switch(event.getCode()){
+                        case W:
+                            if(event.getEventType() == KeyEvent.KEY_PRESSED){
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }else {
+                                // userPaddle.update(0);
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }
                         break;
-                    case UP:
-                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }else {
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }
-                        break;
-                    case DOWN:
-                        if(event.getEventType() == KeyEvent.KEY_PRESSED){
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }else {
-                            pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
-                            pw.flush();
-                            event.consume();
-                        }
-                        break;
+                        case S:
+                            if(event.getEventType() == KeyEvent.KEY_PRESSED){
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }else {
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }
+                            break;
+                    }
+                }else {
+                    switch(event.getCode()){
+                        case UP:
+                            if(event.getEventType() == KeyEvent.KEY_PRESSED){
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }else {
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }
+                            break;
+                        case DOWN:
+                            if(event.getEventType() == KeyEvent.KEY_PRESSED){
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }else {
+                                pw.println(makeKeyDataToSend(playerCode, event.getCode().toString(),event.getEventType().toString()));
+                                pw.flush();
+                                event.consume();
+                            }
+                            break;
+                    }
                 }
+
             }
         };
         this.setOnKeyPressed(handler);
@@ -273,6 +371,8 @@ public class MultiGameScene extends Scene {
         });
     }
     void draw() {
+        System.out.println("데이터 : " + getMballX() + " // " + getMballY());
+        System.out.println("--------------------");
         // clear previous drawing
         this.gc.clearRect(0,0, Width,Height);
 
@@ -283,24 +383,24 @@ public class MultiGameScene extends Scene {
         gc.strokeLine(Width/2,0,Width/2+10,Height);
 
         // draw userPaddle
-        this.gc.setFill(Color.WHITE);
+        this.gc.setFill(p1Color);
         // this.gc.fillRect(0,userPaddle.getY(), Paddle.Width,Paddle.Height);
-        this.gc.fillRect(0,player1Y, Paddle.Width,Paddle.Height);
+        this.gc.fillRect(0,getPlayer1Y(), Paddle.Width,Paddle.Height);
 
         // draw pcPaddle
-        this.gc.setFill(Color.RED);
+        this.gc.setFill(p2Color);
         // this.gc.fillRect(pcPaddle.getX(),pcPaddle.getY(), Paddle.Width,Paddle.Height);
-        this.gc.fillRect(pcPaddle.getX(),player2Y, Paddle.Width,Paddle.Height);
+        this.gc.fillRect(pcPaddle.getX(),getPlayer2Y(), Paddle.Width,Paddle.Height);
 
         // draw ball
         gc.setFill(ball.getColor());
         // gc.fillRoundRect(ball.getX(), ball.getY(),Ball.Width, Ball.Height,Ball.Width,Ball.Height);
-        gc.fillRoundRect(MballX, MballY,Ball.Width, Ball.Height,Ball.Width,Ball.Height);
+        gc.fillRoundRect(getMballX(), getMballY(),Ball.Width, Ball.Height,Ball.Width,Ball.Height);
 
         // draw scroe
         gc.setFill(Color.WHITE);
-        gc.fillText(score.getP1Score(),Width/2-50,50);
-        gc.fillText(score.getP2Score(),Width/2+25,50);
+        gc.fillText(getPlayer1Score(),Width/2-50,50);
+        gc.fillText(getPlayer2Score(),Width/2+25,50);
     }
 
     // 에니메이션 쓰레드 생성함수
@@ -308,7 +408,8 @@ public class MultiGameScene extends Scene {
         AnimationTimer timer = new AnimationTimer(){
             @Override
             public void handle(long now){
-                gameLogic();
+                // gameLogic();
+                draw();
             }
         };
         return timer;

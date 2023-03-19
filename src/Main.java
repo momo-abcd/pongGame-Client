@@ -11,7 +11,7 @@ public class Main extends Application {
 
     public void start(Stage stage) {
         primaryStage = stage;
-        GameScene gameScene = new GameScene(primaryStage);
+        // GameScene gameScene = new GameScene(primaryStage);
         StandByScene standByScene = new StandByScene(stage);
 
         // stage.setScene(gameScene);
